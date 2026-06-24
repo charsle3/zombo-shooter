@@ -24,11 +24,13 @@ class Main: # Main class contains primary functions and variables -- live zombie
         for shot in self.liveBullets: #move and print bullets on screen
             shot.move()
             shot.update()
+            shot.ageCheck()
 
         for mob in self.liveZombies: #move and print zombies on screen (also turn them towards player)
             mob.turn()
             mob.move(user.x_pos, user.y_pos)
             mob.update()
+            mob.ageCheck()
 
         if self.score > 1: #check the score and derive the level from it
             self.level = int(self.score / 2)
@@ -107,6 +109,7 @@ class Thing: #parent class for things with position and collision boxes
         self.angle = angle #starting angle
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos)) #collision box
         self.image = pygame.transform.rotate(self.image, self.angle)
+        self.age = int(pygame.time.get_ticks() / 1000) #used for despawn time
 
     def move(self): #stub for polymorphism
         pass
@@ -121,12 +124,15 @@ class Thing: #parent class for things with position and collision boxes
     def turn(self): #stub for polymorphism (player turns towards mouse, zombies turn towards player)
         pass
 
+    def ageCheck(self):
+        if int(pygame.time.get_ticks() / 1000) - self.age > 3 + (core.level / 2): #check age and kill if too old
+            self.kill()
+
 class Zombie(Thing): #class used for zombie objects
     def __init__(self, image, x_pos, y_pos, angle, level):
         super().__init__(image, x_pos, y_pos, angle)
         self.health = 2 #health determines number of bullets to kill
         self.level = level #used for health and amount of time before despawn
-        self.age = int(pygame.time.get_ticks() / 1000) #used for despawn time
 
     def move(self, playerx, playery): #get player position, move towards them
         if self.x_pos < playerx:
@@ -146,9 +152,6 @@ class Zombie(Thing): #class used for zombie objects
         self.angle = angle
         self.image = pygame.transform.rotate(self.originalImage, angle)
 
-        if int(pygame.time.get_ticks() / 1000) - self.age > 3 + (self.level / 2): #check age and kill if too old
-            self.kill()
-
     def kill(self): #different from parent class, check health before killing
         self.health = self.health - 1
 
@@ -163,7 +166,6 @@ class Bullet(Thing): #class for bullet objects
         dx = mouse[0] - self.x_pos
         dy = -(mouse[1] - self.y_pos)
         self.angle = math.atan2(dy, dx) #get angle again to calculate movement
-        self.age = int(pygame.time.get_ticks() / 1000) #use for despawn time
         
 
     def move(self): #calculates new coordinates based on angle 
@@ -172,9 +174,6 @@ class Bullet(Thing): #class for bullet objects
 
         self.x_pos = self.x_pos + dx
         self.y_pos = self.y_pos - dy
-
-        if int(pygame.time.get_ticks() / 1000) - self.age > 3: #check age 
-            self.kill()
 
 class Player(Thing): #class of player object
     def __init__(self, image, x_pos, y_pos, angle):
