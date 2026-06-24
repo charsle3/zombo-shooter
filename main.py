@@ -249,7 +249,7 @@ user = Player(player_surface, 400, 400, 0) #make player object global so coordin
 
 spawn = pygame.USEREVENT #make custom event for spawning zombies global
 
-pygame.time.set_timer(spawn, 5000) #global timer for regulating zombie creation (every 2sec)
+pygame.time.set_timer(spawn, 5000 + (core.level * 250)) #global timer for regulating zombie creation
 
 while running: #Game loop
     core.events()
