@@ -124,7 +124,7 @@ class Thing: #parent class for things with position and collision boxes
 class Zombie(Thing): #class used for zombie objects
     def __init__(self, image, x_pos, y_pos, angle, level):
         super().__init__(image, x_pos, y_pos, angle)
-        self.health = level #health determines number of bullets to kill
+        self.health = 2 #health determines number of bullets to kill
         self.level = level #used for health and amount of time before despawn
         self.age = int(pygame.time.get_ticks() / 1000) #used for despawn time
 
@@ -146,7 +146,7 @@ class Zombie(Thing): #class used for zombie objects
         self.angle = angle
         self.image = pygame.transform.rotate(self.originalImage, angle)
 
-        if int(pygame.time.get_ticks() / 1000) - self.age > self.level: #check age and kill if too old
+        if int(pygame.time.get_ticks() / 1000) - self.age > 3 + (self.level / 2): #check age and kill if too old
             self.kill()
 
     def kill(self): #different from parent class, check health before killing
@@ -237,7 +237,7 @@ user = Player(player_surface, 400, 400, 0) #make player object global so coordin
 
 spawn = pygame.USEREVENT #make custom event for spawning zombies global
 
-pygame.time.set_timer(spawn, 2000) #global timer for regulating zombie creation (every 2sec)
+pygame.time.set_timer(spawn, 5000) #global timer for regulating zombie creation (every 2sec)
 
 while running: #Game loop
     core.events()
