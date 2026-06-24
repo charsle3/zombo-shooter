@@ -28,7 +28,7 @@ class Main: # Main class contains primary functions and variables -- live zombie
 
         for mob in self.liveZombies: #move and print zombies on screen (also turn them towards player)
             mob.turn()
-            mob.move(user.x_pos, user.y_pos)
+            mob.move()
             mob.update()
             mob.ageCheck()
 
@@ -87,14 +87,22 @@ class Main: # Main class contains primary functions and variables -- live zombie
 
     def makeZombie(self, quant): #make a certain number of zombies (goes up as game progresses)
         for count in range(quant):
-            x_pos = random.randint(0, 1) #pick one of the four corners of the screen randomly
-            y_pos = random.randint(0, 1)
 
-            if x_pos == 1:
-                x_pos = 800
+            side = random.randint(0, 3) #pick a side of the screen to spawn on 
 
-            if y_pos == 1:
-                y_pos = 800
+            match side: #spawn off the edge of screen in chosen direction
+                case 0:
+                    x_pos = 0
+                    y_pos = random.randint(0, BOTTOM_EDGE)
+                case 1:
+                    x_pos = random.randint(0, RIGHT_EDGE)
+                    y_pos = 0
+                case 2:
+                    x_pos = 800
+                    y_pos = random.randint(0, BOTTOM_EDGE)
+                case 3:
+                    x_pos = random.randint(0, RIGHT_EDGE)
+                    y_pos = 800
 
             mob = Zombie(zombie_surface, x_pos, y_pos, 0, self.level)
             self.liveZombies.append(mob) #make a zombie object and put it in the live list
@@ -133,17 +141,19 @@ class Zombie(Thing): #class used for zombie objects
         super().__init__(image, x_pos, y_pos, angle)
         self.health = 2 #health determines number of bullets to kill
         self.level = level #used for health and amount of time before despawn
+        
+        
 
-    def move(self, playerx, playery): #get player position, move towards them
-        if self.x_pos < playerx:
-            self.x_pos += 10 * delta_time
-        elif self.x_pos > playerx:
-            self.x_pos -= 10 * delta_time
+    def move(self): #get player position, move towards them
+        dx = user.x_pos - self.x_pos
+        dy = -(user.y_pos - self.y_pos)
+        moveAngle = math.atan2(dy, dx)
 
-        if self.y_pos < playery:
-            self.y_pos += 10 * delta_time
-        elif self.y_pos > playery:
-            self.y_pos -= 10 * delta_time
+        dx = math.cos(moveAngle) * (20 * delta_time)
+        dy = math.sin(moveAngle) * (20 * delta_time)
+
+        self.x_pos = self.x_pos + dx
+        self.y_pos = self.y_pos - dy
 
     def turn(self): #Get player position, turn towards them
         dx = user.x_pos - self.x_pos
@@ -182,21 +192,21 @@ class Player(Thing): #class of player object
     def moveUp(self): #movement functions -- loop around edges of screen
         self.y_pos -= 50 * delta_time
         if self.y_pos <= -1:
-            self.y_pos = 800
+            self.y_pos = BOTTOM_EDGE
 
     def moveDown(self):
         self.y_pos += 50 * delta_time
-        if self.y_pos >= 801:
+        if self.y_pos >= BOTTOM_EDGE + 1:
             self.y_pos = 0
 
     def moveLeft(self):
         self.x_pos -= 50 * delta_time
         if self.x_pos <= -1:
-            self.x_pos = 801
+            self.x_pos = RIGHT_EDGE
 
     def moveRight(self):
         self.x_pos += 50 * delta_time
-        if self.x_pos >= 800:
+        if self.x_pos >= RIGHT_EDGE + 1:
             self.x_pos = 0
 
     def turn(self): #turn towards mouse
@@ -219,6 +229,9 @@ delta_time = 0.1 #modifier for determining movement speed
 screen = pygame.display.set_mode((800, 800)) #create window
 pygame.display.set_caption("Shoot!")
 main_font = pygame.font.SysFont("cambria", 50)
+
+RIGHT_EDGE = 800
+BOTTOM_EDGE = 800
 
 player_surface = pygame.image.load('./player.png').convert_alpha() #load and scale player, bullet and zombie surfaces
 player_surface = pygame.transform.scale_by(player_surface, .25)
