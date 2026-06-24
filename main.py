@@ -51,7 +51,7 @@ class Main: # Main class contains primary functions and variables -- live zombie
                 shot = Bullet(bullet_surface, user.x_pos, user.y_pos, user.angle)
                 self.liveBullets.append(shot)
             if event.type == spawn: #global timer creates custom event for zombie spawns
-                self.makeZombie(self.level)
+                self.makeZombie(int(self.level / 3) + 1)
 
         keys = pygame.key.get_pressed() #user input, happens as long as the key stays depressed
         if keys[pygame.K_a]:
@@ -140,7 +140,7 @@ class Zombie(Thing): #class used for zombie objects
     def __init__(self, image, x_pos, y_pos, angle, level):
         super().__init__(image, x_pos, y_pos, angle)
         self.health = 2 #health determines number of bullets to kill
-        self.level = level #used for health and amount of time before despawn
+        self.level = level #used for amount of time before despawn
         
         
 
